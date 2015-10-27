@@ -3,6 +3,7 @@ from datetime import timedelta
 
 class Entry(object):
 	def __init__(self, topic, start=None, end=None):
+		"""Create a new Entry object for use in a TimeTrackerManager."""
 		self.topic = topic
 		self.start = start
 		self.end = end
@@ -18,6 +19,7 @@ class Entry(object):
                 return topic, start, end	
 
         def parse_time(self, t):
+		"""Get datetime from a string, t."""
                 if t.lower().strip() == "none":
                         return None
                 date, time = t.split('T')
@@ -29,6 +31,7 @@ class Entry(object):
                 return datetime(date[0], date[1], date[2], time[0], time[1], time[2], time[3])
 
 	def line_init(self, line):
+		"""Populate topic, start, and stop from the given line"""
 		pline = self.parse_line(line)
 		self.topic = pline[0]
 		self.start = None if pline[1] == "None" else self.parse_time(pline[1])
@@ -64,6 +67,7 @@ class TimeTrackerManager(object):
 		self.data = list() # a list of tuples: (topic, start, end)
 
 	def load(self):
+		"""Load the database from filename"""
 		fin = None
 		try:
 			fin = open(self.filename, 'r')
@@ -79,6 +83,7 @@ class TimeTrackerManager(object):
 				fin.close()
 
 	def save(self):
+		"""Write the current data to filename"""
 		fout = open(self.filename, 'w')
 		for datum in self.data:
 			fout.write(str(datum) + '\n')
@@ -102,25 +107,35 @@ class TimeTrackerManager(object):
 		return all_instances[-1][1]
 
 	def start(self, topic):
+		"""Record start time for this topic."""
 		self.data.append( Entry(topic, datetime.now(), None) )
 
 	def end(self, topic):
+		"""Record end time for this topic"""
 		i = self.findRecentIndex(topic)
 		if (i != None):
 			self.data[i].end = datetime.now()
 
 	def filter_topic(self, t):
+		"""Filter etries by topic"""
 		f = lambda e : e.topic == t
 		return filter(f, self.data)
 
 	def report_time_delta(self, td):
+		"""Reports total time delta in hours (rounded down)"""
 		hours = int(td.total_seconds() / 60 / 60)
 		return hours
 
+	def report_time_delta_minutes(self, td):
+		"""Report total time delta in minutes (rounded down)"""
+		minutes = int(td.total_seconds() / 60)
+		return minutes
+
 	def sum(self, topic):
+		"""Report the total sum of time, in timedelta"""
 		all_entries = self.filter_topic(topic)
 		tot = timedelta(0, 0, 0) 
 		for entry in all_entries:
 			tot += entry.delta()
-		return self.report_time_delta(tot)
+		return tot
 

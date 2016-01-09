@@ -1,5 +1,4 @@
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 
 class Entry(object):
@@ -10,28 +9,28 @@ class Entry(object):
         self.start = start
         self.end = end
 
-        def parse_line(self, line):
-                """Parse a line from a file for storage and use in data
-                container. The line should be in the following format:
-                        <topic>\t<start>\t<end>
-                Where start and end are stored as Datetime Strings"""
-                if line.strip().lower() == None:
-                        return None
-                topic, start, end = [a.strip() for a in line.split('\t')]
-                return topic, start, end
+    def parse_line(self, line):
+        """Parse a line from a file for storage and use in data
+        container. The line should be in the following format:
+                <topic>\t<start>\t<end>
+        Where start and end are stored as Datetime Strings"""
+        if line.strip().lower() == None:
+            return None
+        topic, start, end = [a.strip() for a in line.split('\t')]
+        return topic, start, end
 
-        def parse_time(self, t):
-                """Get datetime from a string, t."""
-                if t.lower().strip() == "none":
-                        return None
-                date, time = t.split('T')
-                date = [ int(a) for a in date.split('-')]
-                time = time.split(':')
-                time[2], millis = time[2].split('.')
-                time.append(millis)
-                time = [int(a) for a in time]
-                return datetime(date[0], date[1], date[2],
-                                time[0], time[1], time[2], time[3])
+    def parse_time(self, t):
+        """Get datetime from a string, t."""
+        if t.lower().strip() == "none":
+            return None
+        date, time = t.split('T')
+        date = [ int(a) for a in date.split('-')]
+        time = time.split(':')
+        time[2], millis = time[2].split('.')
+        time.append(millis)
+        time = [int(a) for a in time]
+        return datetime(date[0], date[1], date[2],
+                        time[0], time[1], time[2], time[3])
 
     def line_init(self, line):
         """Populate topic, start, and stop from the given line"""
@@ -69,6 +68,7 @@ class Entry(object):
 
 
 class TimeTrackerManager(object):
+
     def __init__(self, filename=".defaultTracker.txt"):
         self.filename = filename
         self.data = list() # a list of tuples: (topic, start, end)
@@ -84,7 +84,7 @@ class TimeTrackerManager(object):
                 entry.line_init(line)
                 self.data.append( entry )
         except IOError:
-            print("Data file does not exist. Creating new data file at " +
+            print("Default file does not exist. Creating new default file at "+
                   self.filename)
         finally:
             if fin != None:
@@ -147,4 +147,3 @@ class TimeTrackerManager(object):
         for entry in all_entries:
             tot += entry.delta()
         return tot
-
